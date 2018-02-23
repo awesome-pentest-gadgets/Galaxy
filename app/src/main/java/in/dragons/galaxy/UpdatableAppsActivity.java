@@ -29,6 +29,8 @@ public class UpdatableAppsActivity extends AppListActivity {
         setTitle(getString(R.string.activity_title_updates_only));
         onNewIntent(getIntent());
 
+        notifyConnected(this);
+
         TextView delta = (TextView) findViewById(R.id.updates_setting);
         delta.setText(sharedPreferences.getBoolean("PREFERENCE_DOWNLOAD_DELTAS", true) ? R.string.delta_enabled : R.string.delta_disabled);
         delta.setVisibility(View.VISIBLE);
@@ -42,7 +44,6 @@ public class UpdatableAppsActivity extends AppListActivity {
         task.setRespectUpdateBlacklist(true);
         task.setIncludeSystemApps(true);
         task.execute();
-        loadApps();
     }
 
     @Override

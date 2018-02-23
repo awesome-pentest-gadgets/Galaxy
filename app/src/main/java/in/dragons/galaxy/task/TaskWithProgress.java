@@ -1,16 +1,18 @@
 package in.dragons.galaxy.task;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.view.View;
 
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
+
 import in.dragons.galaxy.ContextUtil;
+import in.dragons.galaxy.R;
 
 abstract public class TaskWithProgress<T> extends AsyncTask<String, Void, T> {
 
     protected Context context;
-    protected ProgressDialog progressDialog;
+    protected MaterialStyledDialog progressDialog;
     protected View progressIndicator;
 
     public View getProgressIndicator() {
@@ -26,12 +28,14 @@ abstract public class TaskWithProgress<T> extends AsyncTask<String, Void, T> {
     }
 
     public void prepareDialog(int messageId, int titleId) {
-        ProgressDialog dialog = new ProgressDialog(context);
-        dialog.setTitle(context.getString(titleId));
-        dialog.setMessage(context.getString(messageId));
-        dialog.setIndeterminate(true);
-        dialog.setCancelable(false);
-        this.progressDialog = dialog;
+        MaterialStyledDialog.Builder builder=new MaterialStyledDialog.Builder(context)
+                .setHeaderDrawable(R.drawable.header_06)
+                .setTitle(context.getString(titleId))
+                .setDescription(context.getString(messageId))
+                .setNeutralText("Wait a moment please..")
+                .withDialogAnimation(true)
+                .setCancelable(false);
+        this.progressDialog = builder.show();
     }
 
     @Override

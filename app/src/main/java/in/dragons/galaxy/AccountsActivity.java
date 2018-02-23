@@ -44,6 +44,8 @@ public class AccountsActivity extends GalaxyActivity {
         else
             drawDevice();
 
+        notifyConnected(this);
+
         if (isValidEmail(Email) && isConnected()) {
             new GoogleAccountInfo(Email) {
                 @Override

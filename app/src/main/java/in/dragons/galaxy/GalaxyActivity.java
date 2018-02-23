@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
@@ -27,8 +28,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SearchView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.percolate.caffeine.PhoneUtils;
-import com.percolate.caffeine.ToastUtils;
 import com.percolate.caffeine.ViewUtils;
 import com.squareup.picasso.Picasso;
 
@@ -92,9 +95,29 @@ public abstract class GalaxyActivity extends AppCompatActivity implements Naviga
         return (Email.contains("yalp.store.user"));
     }
 
-    public void notifyConnected() {
+    public void notifyConnected(final Context context) {
         if (!isConnected())
-            ToastUtils.quickToast(this, getResources().getString(R.string.error_no_network), true);
+            new MaterialStyledDialog.Builder(this)
+                    .setHeaderDrawable(R.drawable.header_02)
+                    .setTitle(R.string.error_no_network)
+                    .setDescription(R.string.error_no_network_des)
+                    .setPositiveText(R.string.action_retry)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            android.os.Process.killProcess(android.os.Process.myPid());
+                        }
+                    })
+                    .setNegativeText(R.string.action_exit)
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            finishAll();
+                        }
+                    })
+                    .withDialogAnimation(true)
+                    .setCancelable(false)
+                    .show();
     }
 
     public void parseRAW(String rawData) {
@@ -209,19 +232,29 @@ public abstract class GalaxyActivity extends AppCompatActivity implements Naviga
         });
     }
 
-    AlertDialog showLogOutDialog() {
-        return new AlertDialog.Builder(this)
-                .setMessage(R.string.dialog_message_logout)
+    MaterialStyledDialog showLogOutDialog() {
+        return new MaterialStyledDialog.Builder(this)
+                .setHeaderDrawable(R.drawable.header_06)
                 .setTitle(R.string.dialog_title_logout)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                .setDescription(R.string.pref_device_to_pretend_to_be_toast)
+                .setPositiveText(android.R.string.yes)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                         new PlayStoreApiAuthenticator(getApplicationContext()).logout();
-                        dialogInterface.dismiss();
-                        finishAll();
+                        logout = true;
+                        android.os.Process.killProcess(android.os.Process.myPid());
                     }
                 })
-                .setNegativeButton(android.R.string.cancel, null)
+                .setNegativeText(R.string.dialog_two_factor_cancel)
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        return;
+                    }
+                })
+                .withDialogAnimation(true)
+                .setCancelable(true)
                 .show();
     }
 

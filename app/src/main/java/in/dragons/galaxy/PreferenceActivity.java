@@ -1,8 +1,6 @@
 package in.dragons.galaxy;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -12,7 +10,12 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
+import android.support.annotation.NonNull;
 import android.util.Log;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 
 import in.dragons.galaxy.fragment.preference.Blacklist;
 import in.dragons.galaxy.fragment.preference.CheckUpdates;
@@ -83,12 +86,15 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
         themePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(PreferenceActivity.this);
-                builder
+                MaterialStyledDialog.Builder builder = new MaterialStyledDialog.Builder(PreferenceActivity.this);
+                MaterialStyledDialog alertDialog = builder
+                        .setHeaderDrawable(R.drawable.header_05)
                         .setTitle(R.string.dialog_theme_title)
-                        .setMessage(R.string.dialog_theme_msg)
-                        .setPositiveButton(R.string.dialog_theme_apply, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
+                        .setDescription(R.string.dialog_theme_msg)
+                        .setPositiveText(R.string.dialog_theme_apply)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 Intent intent = getBaseContext()
                                         .getPackageManager()
                                         .getLaunchIntentForPackage(getBaseContext().getPackageName());
@@ -97,12 +103,16 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
                                 startActivity(intent);
                             }
                         })
-                        .setNegativeButton(R.string.dialog_theme_later, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
+                        .setNegativeText(R.string.dialog_theme_later)
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 return;
                             }
-                        });
-                builder.show();
+                        })
+                        .setCancelable(true)
+                        .withDialogAnimation(true)
+                        .show();
                 return true;
             }
         });

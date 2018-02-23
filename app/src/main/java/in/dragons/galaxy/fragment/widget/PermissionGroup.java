@@ -1,7 +1,6 @@
 package in.dragons.galaxy.fragment.widget;
 
 import android.annotation.TargetApi;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionGroupInfo;
@@ -16,13 +15,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import in.dragons.galaxy.R;
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import in.dragons.galaxy.R;
 
 public class PermissionGroup extends LinearLayout {
 
@@ -65,7 +66,7 @@ public class PermissionGroup extends LinearLayout {
         Collections.sort(permissionLabels);
         LinearLayout permissionLabelsView = findViewById(R.id.permission_labels);
         permissionLabelsView.removeAllViews();
-        for (String permissionLabel: permissionLabels) {
+        for (String permissionLabel : permissionLabels) {
             addPermissionLabel(permissionLabelsView, permissionLabel, permissionMap.get(permissionLabel));
         }
     }
@@ -85,14 +86,14 @@ public class PermissionGroup extends LinearLayout {
     private Drawable getPermissionGroupIcon(PermissionGroupInfo permissionGroupInfo) {
         try {
             return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1
-                ? getContext().getResources().getDrawable(permissionGroupInfo.icon, getContext().getTheme())
-                : getContext().getResources().getDrawable(permissionGroupInfo.icon)
-            ;
+                    ? getContext().getResources().getDrawable(permissionGroupInfo.icon, getContext().getTheme())
+                    : getContext().getResources().getDrawable(permissionGroupInfo.icon)
+                    ;
         } catch (Resources.NotFoundException e) {
             return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1
-                ? permissionGroupInfo.loadUnbadgedIcon(pm)
-                : permissionGroupInfo.loadIcon(pm)
-            ;
+                    ? permissionGroupInfo.loadUnbadgedIcon(pm)
+                    : permissionGroupInfo.loadIcon(pm)
+                    ;
         }
     }
 
@@ -105,11 +106,15 @@ public class PermissionGroup extends LinearLayout {
         return new OnClickListener() {
             @Override
             public void onClick(View v) {
-                new AlertDialog.Builder(getContext())
-                    .setIcon(getPermissionGroupIcon(permissionGroupInfo))
-                    .setTitle((title.equals(permissionGroupInfo.name) || title.equals(permissionGroupInfo.packageName)) ? "" : title)
-                    .setMessage(message)
-                    .show()
+                new MaterialStyledDialog.Builder(getContext())
+                        .setHeaderDrawable(R.drawable.header_07)
+                        .setIcon(getPermissionGroupIcon(permissionGroupInfo))
+                        .setTitle((title.equals(permissionGroupInfo.name) || title.equals(permissionGroupInfo.packageName)) ? "" : title)
+                        .setDescription(message)
+                        .withIconAnimation(true)
+                        .withDialogAnimation(true)
+                        .setPositiveText(android.R.string.ok)
+                        .show()
                 ;
             }
         };

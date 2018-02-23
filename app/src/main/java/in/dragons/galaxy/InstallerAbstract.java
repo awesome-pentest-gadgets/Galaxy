@@ -1,14 +1,17 @@
 package in.dragons.galaxy;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.util.Log;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 
 import java.io.File;
 
@@ -93,33 +96,28 @@ public abstract class InstallerAbstract {
         context.sendBroadcast(intent);
     }
 
-    private AlertDialog getSignatureMismatchDialog(final App app) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+    private MaterialStyledDialog getSignatureMismatchDialog(final App app) {
+        MaterialStyledDialog.Builder builder = new MaterialStyledDialog.Builder(context);
         builder
-                .setMessage(R.string.details_signature_mismatch)
-                .setPositiveButton(
-                        android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        }
-                )
-        ;
-        if (new BlackWhiteListManager(context).isUpdatable(app.getPackageName())) {
-            builder.setNegativeButton(
-                    R.string.action_ignore,
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            context.startService(getIgnoreIntent(app));
-                            dialog.cancel();
-                        }
+                .setDescription(R.string.details_signature_mismatch)
+                .setPositiveText(android.R.string.ok)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        return;
                     }
-            );
+                });
+        if (new BlackWhiteListManager(context).isUpdatable(app.getPackageName())) {
+            builder.setNeutralText(R.string.action_ignore)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            context.startService(getIgnoreIntent(app));
+                        }
+                    });
         }
-        return builder.create();
+        builder.withDialogAnimation(true);
+        return builder.show();
     }
 
     private void notifySignatureMismatch(App app) {

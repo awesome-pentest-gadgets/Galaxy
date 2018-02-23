@@ -6,10 +6,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.yeriomin.playstoreapi.PropertiesDeviceInfoProvider;
 
 import java.util.LinkedHashMap;
@@ -101,19 +105,34 @@ public class Device extends List {
         PreferenceManager.getDefaultSharedPreferences(activity)
                 .edit()
                 .putBoolean(PREFERENCE_DEVICE_DEFINITION_REQUESTED, true)
-                .commit()
+                .apply();
         ;
         return true;
     }
 
     private AlertDialog showLogOutDialog() {
-        return new AlertDialog.Builder(activity)
-                .setMessage(R.string.pref_device_to_pretend_to_be_toast)
+        new MaterialStyledDialog.Builder(activity)
+                .setHeaderDrawable(R.drawable.header_01)
                 .setTitle(R.string.dialog_title_logout)
-                .setPositiveButton(android.R.string.yes, new RequestOnClickListener(activity, true))
-                .setNegativeButton(R.string.dialog_two_factor_cancel, new RequestOnClickListener(activity, false))
-                .show()
-                ;
+                .setDescription(R.string.pref_device_to_pretend_to_be_toast)
+                .setPositiveText(android.R.string.yes)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        new RequestOnClickListener(activity, true);
+                    }
+                })
+                .setNegativeText(R.string.dialog_two_factor_cancel)
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        new RequestOnClickListener(activity, false);
+                    }
+                })
+                .setCancelable(true)
+                .withDialogAnimation(true)
+                .show();
+        return null;
     }
 
     private void finishAll() {

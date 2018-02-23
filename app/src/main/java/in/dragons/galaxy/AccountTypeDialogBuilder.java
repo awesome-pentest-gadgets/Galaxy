@@ -1,9 +1,12 @@
 package in.dragons.galaxy;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.support.annotation.NonNull;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 
 import java.io.IOException;
 
@@ -16,27 +19,30 @@ public class AccountTypeDialogBuilder extends CredentialsDialogBuilder {
     }
 
     @Override
-    public Dialog show() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        final Dialog alertDialog = builder
+    public MaterialStyledDialog show() {
+        MaterialStyledDialog.Builder builder = new MaterialStyledDialog.Builder(context);
+        final MaterialStyledDialog materialStyledDialog = builder
+                .setHeaderDrawable(R.drawable.header_00)
                 .setTitle(R.string.dialog_account_type_title)
-                .setItems(
-                        R.array.accountType,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                if (which == 0) {
-                                    showCredentialsDialog();
-                                } else {
-                                    logInWithPredefinedAccount();
-                                }
-                            }
-                        }
-                )
-                .setCancelable(true)
-                .create();
-        alertDialog.show();
-        return alertDialog;
+                .setDescription(R.string.dialog_account_type_description)
+                .setPositiveText(R.string.login_google)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        showCredentialsDialog();
+                    }
+                })
+                .setNegativeText(R.string.login_dummy)
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        logInWithPredefinedAccount();
+                    }
+                })
+                .withDialogAnimation(true)
+                .setCancelable(false)
+                .show();
+        return materialStyledDialog;
     }
 
     public Dialog showCredentialsDialog() {

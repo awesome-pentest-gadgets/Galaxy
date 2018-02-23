@@ -22,6 +22,7 @@ public class AboutActivity extends GalaxyActivity {
         setContentView(R.layout.about_activity_layout);
         super.onCreateDrawer(savedInstanceState);
 
+        notifyConnected(this);
         drawVersion();
         drawActions();
         drawDevCard(R.string.dev1_imgURL, (ImageView) findViewById(R.id.dev1_avatar));

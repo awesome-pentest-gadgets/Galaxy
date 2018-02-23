@@ -1,15 +1,17 @@
 package in.dragons.galaxy;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.yeriomin.playstoreapi.AuthException;
 import com.github.yeriomin.playstoreapi.GooglePlayException;
 import com.github.yeriomin.playstoreapi.TokenDispenserException;
@@ -99,37 +101,34 @@ abstract public class CredentialsDialogBuilder {
             }
         }
 
-        private AlertDialog getTwoFactorAuthDialog() {
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        private MaterialStyledDialog getTwoFactorAuthDialog() {
+            MaterialStyledDialog.Builder builder = new MaterialStyledDialog.Builder(context);
             return builder
-                    .setMessage(R.string.dialog_message_two_factor)
+                    .setDescription(R.string.dialog_message_two_factor)
                     .setTitle(R.string.dialog_title_two_factor)
-                    .setPositiveButton(
-                            R.string.dialog_two_factor_create_password,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Intent i = new Intent(Intent.ACTION_VIEW);
-                                    i.setData(Uri.parse(APP_PASSWORDS_URL));
-                                    if (i.resolveActivity(context.getPackageManager()) != null) {
-                                        context.startActivity(i);
-                                    } else {
-                                        Log.e(getClass().getSimpleName(), "No application available to handle http links... very strange");
-                                    }
-                                    android.os.Process.killProcess(android.os.Process.myPid());
-                                }
+                    .setPositiveText(R.string.dialog_two_factor_create_password)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Intent i = new Intent(Intent.ACTION_VIEW);
+                            i.setData(Uri.parse(APP_PASSWORDS_URL));
+                            if (i.resolveActivity(context.getPackageManager()) != null) {
+                                context.startActivity(i);
+                            } else {
+                                Log.e(getClass().getSimpleName(), "No application available to handle http links... very strange");
                             }
-                    )
-                    .setNegativeButton(
-                            R.string.dialog_two_factor_cancel,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    android.os.Process.killProcess(android.os.Process.myPid());
-                                }
-                            }
-                    )
-                    .create();
+                            android.os.Process.killProcess(android.os.Process.myPid());
+                        }
+                    })
+                    .setNegativeText(R.string.dialog_two_factor_cancel)
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            android.os.Process.killProcess(android.os.Process.myPid());
+                        }
+                    })
+                    .withDialogAnimation(true)
+                    .show();
         }
     }
 }

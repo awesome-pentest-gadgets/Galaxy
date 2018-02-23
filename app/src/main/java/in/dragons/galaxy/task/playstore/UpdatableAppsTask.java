@@ -1,9 +1,5 @@
 package in.dragons.galaxy.task.playstore;
 
-import android.app.Activity;
-import android.app.Dialog;
-import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
@@ -20,10 +16,8 @@ import java.util.Map;
 import java.util.Set;
 
 import in.dragons.galaxy.BlackWhiteListManager;
-import in.dragons.galaxy.ContextUtil;
 import in.dragons.galaxy.PlayStoreApiAuthenticator;
 import in.dragons.galaxy.PreferenceActivity;
-import in.dragons.galaxy.R;
 import in.dragons.galaxy.model.App;
 import in.dragons.galaxy.task.InstalledAppsTask;
 
@@ -58,10 +52,6 @@ public class UpdatableAppsTask extends RemoteAppListTask {
     @Override
     protected void processIOException(IOException e) {
         super.processIOException(e);
-        if (noNetwork(e) && context instanceof Activity) {
-            ContextUtil.toast(context, R.string.error_no_network);
-            getNotNetworkDialog(context).show();
-        }
     }
 
     private App addInstalledAppInfo(App appFromMarket, App installedApp) {
@@ -107,13 +97,5 @@ public class UpdatableAppsTask extends RemoteAppListTask {
             }
         }
         return result;
-    }
-
-    private Dialog getNotNetworkDialog(Context c) {
-        Dialog dialog = new Dialog(c);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        dialog.setContentView(R.layout.dialog_network)
-        ;
-        return dialog;
     }
 }

@@ -1,15 +1,18 @@
 package in.dragons.galaxy;
 
-import android.app.AlertDialog;
 import android.app.SearchManager;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 
 import java.util.regex.Pattern;
 
@@ -134,26 +137,29 @@ public class SearchActivity extends EndlessScrollActivity {
             }
         }
 
-        private AlertDialog showPackageIdDialog(final String packageId) {
-            return new AlertDialog.Builder(activity)
-                    .setMessage(R.string.dialog_message_package_id)
+        private MaterialStyledDialog showPackageIdDialog(final String packageId) {
+            return new MaterialStyledDialog.Builder(activity)
+                    .setHeaderDrawable(R.drawable.header_04)
                     .setTitle(R.string.dialog_title_package_id)
-                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    .setDescription(R.string.dialog_message_package_id)
+                    .setPositiveText(android.R.string.yes)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                             activity.startActivity(DetailsActivity.getDetailsIntent(activity, packageId));
-                            dialogInterface.dismiss();
                             activity.finish();
                         }
                     })
-                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    .setNegativeText(R.string.dialog_two_factor_cancel)
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
                         @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                             activity.loadApps();
                         }
                     })
-                    .show()
-                    ;
+                    .withDialogAnimation(true)
+                    .setCancelable(true)
+                    .show();
         }
     }
 }

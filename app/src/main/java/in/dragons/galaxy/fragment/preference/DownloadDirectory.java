@@ -1,12 +1,15 @@
 package in.dragons.galaxy.fragment.preference;
 
 import android.Manifest;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
+import android.support.annotation.NonNull;
 import android.util.Log;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,29 +83,31 @@ public class DownloadDirectory extends Abstract {
                 }
             }
 
-            private AlertDialog getFallbackDialog() {
-                return new AlertDialog.Builder(activity)
-                        .setMessage(
-                                activity.getString(R.string.error_downloads_directory_not_writable)
-                                        + "\n\n"
-                                        + activity.getString(R.string.pref_message_fallback, Paths.FALLBACK_DIRECTORY)
-                        )
-                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            private MaterialStyledDialog getFallbackDialog() {
+                return new MaterialStyledDialog.Builder(activity)
+                        .setHeaderDrawable(R.drawable.header_03)
+                        .setTitle(R.string.dialog_title_logout)
+                        .setDescription(activity.getString(R.string.error_downloads_directory_not_writable)
+                                + "\n\n" + activity.getString(R.string.pref_message_fallback, Paths.FALLBACK_DIRECTORY))
+                        .setPositiveText(android.R.string.yes)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 preference.setText(Paths.FALLBACK_DIRECTORY);
                                 preference.getOnPreferenceChangeListener().onPreferenceChange(preference, Paths.FALLBACK_DIRECTORY);
                                 dialog.dismiss();
                             }
                         })
-                        .create()
-                        ;
+                        .setNegativeText(android.R.string.cancel)
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .setCancelable(true)
+                        .withDialogAnimation(true)
+                        .show();
             }
         });
     }
