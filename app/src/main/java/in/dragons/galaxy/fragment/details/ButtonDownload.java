@@ -132,7 +132,6 @@ public class ButtonDownload extends Button {
         purchaseTask.setApp(app);
         purchaseTask.setContext(activity);
         purchaseTask.setTriggeredBy(activity instanceof ManualDownloadActivity ? MANUAL_DOWNLOAD_BUTTON : DOWNLOAD_BUTTON);
-        purchaseTask.setProgressIndicator(activity.findViewById(R.id.progress));
         return purchaseTask;
     }
 
