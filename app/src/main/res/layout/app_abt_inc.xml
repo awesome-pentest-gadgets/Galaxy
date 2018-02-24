@@ -6,7 +6,6 @@
     android:fadeScrollbars="true"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -84,7 +83,7 @@
                         android:drawableStart="@drawable/ic_github"
                         android:drawableTint="?android:textColor"
                         android:focusable="true"
-                        android:text="Github" />
+                        android:text="@string/about_github" />
 
                     <TextView
                         android:id="@+id/xda"
@@ -96,7 +95,7 @@
                         android:drawableStart="@drawable/ic_xda"
                         android:drawableTint="@color/colorOrange"
                         android:focusable="true"
-                        android:text="Dev Thread" />
+                        android:text="@string/about_xda" />
 
                     <TextView
                         android:id="@+id/telegram"
@@ -108,7 +107,7 @@
                         android:drawableStart="@drawable/ic_telegram"
                         android:drawableTint="@color/colorBlue"
                         android:focusable="true"
-                        android:text="Telegram" />
+                        android:text="@string/about_telegram" />
                 </LinearLayout>
             </android.support.v7.widget.CardView>
         </LinearLayout>

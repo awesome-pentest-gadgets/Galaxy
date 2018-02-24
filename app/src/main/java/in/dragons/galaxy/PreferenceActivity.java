@@ -79,10 +79,11 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         setTheme(sharedPreferences.getBoolean("THEME", true) ? R.style.AppTheme : R.style.AppTheme_Dark);
         super.onCreate(savedInstanceState);
+
         addPreferencesFromResource(R.xml.settings);
         setContentView(R.layout.preference_activity_layout);
-        themePref = (SwitchPreference) findPreference("THEME");
 
+        themePref = (SwitchPreference) findPreference("THEME");
         themePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -107,7 +108,10 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
                         .onNegative(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                return;
+                                if (themePref.isChecked())
+                                    themePref.setChecked(false);
+                                else
+                                    themePref.setChecked(true);
                             }
                         })
                         .setCancelable(true)
