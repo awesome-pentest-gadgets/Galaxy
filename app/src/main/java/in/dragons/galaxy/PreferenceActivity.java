@@ -76,50 +76,11 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        setTheme(sharedPreferences.getBoolean("THEME", true) ? R.style.AppTheme : R.style.AppTheme_Dark);
+        //setTheme(R.style.AppTheme_Dark);
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.settings);
-        setContentView(R.layout.preference_activity_layout);
-
-        themePref = (SwitchPreference) findPreference("THEME");
-        themePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                MaterialStyledDialog.Builder builder = new MaterialStyledDialog.Builder(PreferenceActivity.this);
-                MaterialStyledDialog alertDialog = builder
-                        .setHeaderDrawable(R.drawable.header_05)
-                        .setTitle(R.string.dialog_theme_title)
-                        .setDescription(R.string.dialog_theme_msg)
-                        .setPositiveText(R.string.dialog_theme_apply)
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                Intent intent = getBaseContext()
-                                        .getPackageManager()
-                                        .getLaunchIntentForPackage(getBaseContext().getPackageName());
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                android.os.Process.killProcess(android.os.Process.myPid());
-                                startActivity(intent);
-                            }
-                        })
-                        .setNegativeText(R.string.dialog_theme_later)
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                if (themePref.isChecked())
-                                    themePref.setChecked(false);
-                                else
-                                    themePref.setChecked(true);
-                            }
-                        })
-                        .setCancelable(true)
-                        .withDialogAnimation(true)
-                        .show();
-                return true;
-            }
-        });
+        //setContentView(R.layout.preference_activity_layout);
 
         drawBlackList();
         drawLanguages();

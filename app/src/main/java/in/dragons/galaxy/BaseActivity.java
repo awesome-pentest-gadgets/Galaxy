@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SearchView;
 
+import com.afollestad.aesthetic.AestheticActivity;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
@@ -25,7 +26,7 @@ import com.percolate.caffeine.PhoneUtils;
 import com.percolate.caffeine.ViewUtils;
 import com.squareup.picasso.Picasso;
 
-public abstract class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AestheticActivity {
 
     static protected boolean logout = false;
 
