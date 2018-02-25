@@ -22,6 +22,12 @@
             android:id="@+id/action_accounts"
             android:icon="@drawable/ic_account"
             android:title="@string/action_accounts" />
+    </group>
+    <group android:id="@+id/group3">
+        <item
+            android:id="@+id/action_themes"
+            android:icon="@drawable/ic_theme"
+            android:title="@string/action_themes" />
         <item
             android:id="@+id/action_about"
             android:icon="@drawable/ic_about"
