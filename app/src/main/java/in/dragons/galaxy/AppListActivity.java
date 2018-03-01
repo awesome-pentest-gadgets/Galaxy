@@ -107,6 +107,7 @@ abstract public class AppListActivity extends GalaxyActivity {
     public void onContentChange() {
         View emptyView = findViewById(android.R.id.empty);
         listView = ViewUtils.findViewById(this, android.R.id.list);
+        listView.setNestedScrollingEnabled(true);
         if (emptyView != null) {
             listView.setEmptyView(emptyView);
         }
