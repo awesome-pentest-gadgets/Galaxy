@@ -54,7 +54,7 @@ abstract public class CredentialsDialogBuilder {
                 android.os.Process.killProcess(android.os.Process.myPid());
                 if (caller instanceof CloneableTask) {
                     Log.i(getClass().getSimpleName(), caller.getClass().getSimpleName() + " is cloneable. Retrying.");
-                    ((PlayStoreTask) ((CloneableTask) caller).clone()).execute(new String[]{});
+                    ((PlayStoreTask) ((CloneableTask) caller).clone()).execute();
                 }
             }
         }

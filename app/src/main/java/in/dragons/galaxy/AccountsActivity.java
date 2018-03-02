@@ -1,68 +1,57 @@
 package in.dragons.galaxy;
 
-import android.annotation.SuppressLint;
-import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.ImageViewCompat;
-import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
 import java.util.Properties;
 import java.util.TimeZone;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class AccountsActivity extends GalaxyActivity {
 
     AccountTypeDialogBuilder accountTypeDialogBuilder = new AccountTypeDialogBuilder(this);
-
-    SharedPreferences sharedPreferences;
     String deviceName;
     ImageView spoofed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        setTheme(sharedPreferences.getBoolean("THEME", true) ? R.style.AppTheme : R.style.AppTheme_Dark);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.accounts_layout);
-        onCreateDrawer(savedInstanceState);
+
+        FrameLayout contentFrameLayout = (FrameLayout) findViewById(R.id.content_frame);
+        getLayoutInflater().inflate(R.layout.app_acc_inc, contentFrameLayout);
+
+        notifyConnected(this);
 
         deviceName = sharedPreferences.getString(PreferenceActivity.PREFERENCE_DEVICE_TO_PRETEND_TO_BE, "");
 
         spoofed = (ImageView) findViewById(R.id.spoofed_indicator);
-        if (deviceName.contains("device-"))
+
+        if (isSpoofed())
             drawSpoofedDevice();
         else
             drawDevice();
 
-        Email = sharedPreferences.getString(PlayStoreApiAuthenticator.PREFERENCE_EMAIL, "");
-        if (Email.contains("yalp.store.user")) {
+        if (isValidEmail(Email) && isConnected()) {
+            drawGoogle();
+        } else if (isDummyEmail())
             drawDummy();
-        } else {
-            try {
-                getRawData("http://picasaweb.google.com/data/entry/api/user/" + Email);
-                drawGoogle();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+
         setFab();
+    }
+
+    public boolean isSpoofed() {
+        return (deviceName.contains("device-"));
     }
 
     public void drawDevice() {
@@ -120,8 +109,13 @@ public class AccountsActivity extends GalaxyActivity {
             ((LinearLayout) findViewById(R.id.google_container)).setVisibility(View.VISIBLE);
             ((LinearLayout) findViewById(R.id.google_action)).setVisibility(View.VISIBLE);
             ((LinearLayout) findViewById(R.id.no_google)).setVisibility(View.GONE);
+
+            TextView googleName = (TextView) findViewById(R.id.google_name);
+            googleName.setText(sharedPreferences.getString("GOOGLE_NAME", ""));
+
             TextView googleEmail = (TextView) findViewById(R.id.google_email);
             googleEmail.setText(Email);
+
             TextView gsfIdView = (TextView) findViewById(R.id.google_gsf);
             gsfIdView.setText("GSF ID : " + sharedPreferences.getString(PlayStoreApiAuthenticator.PREFERENCE_GSF_ID, ""));
 
@@ -131,6 +125,8 @@ public class AccountsActivity extends GalaxyActivity {
                     showLogOutDialog();
                 }
             });
+
+            loadAvatar(sharedPreferences.getString("GOOGLE_URL", ""));
         }
     }
 
@@ -151,43 +147,11 @@ public class AccountsActivity extends GalaxyActivity {
         });
     }
 
-    @SuppressLint("StaticFieldLeak")
-    public void getRawData(final String url) throws IOException {
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... voids) {
-                OkHttpClient client = new OkHttpClient();
-                Request request = new Request.Builder()
-                        .url(url)
-                        .build();
-                try (Response response = client.newCall(request).execute()) {
-                    return response.body().string();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(String result) {
-                if (result != null && result.contains("atom"))
-                    parseRAW(result);
-                else {
-                    Log.e(this.getClass().getName(), "No network connection");
-                }
-            }
-
-        }.execute();
-    }
-
-    public void parseRAW(String rawData) {
-        TextView googleName = (TextView) findViewById(R.id.google_name);
-        googleName.setText(rawData.substring(rawData.indexOf("<name>") + 6, rawData.indexOf("</name>")));
+    public void loadAvatar(String Url) {
         Picasso.with(this)
-                .load(rawData.substring(rawData.indexOf("<gphoto:thumbnail>") + 18, rawData.lastIndexOf("</gphoto:thumbnail>")))
+                .load(Url)
                 .placeholder(R.drawable.ic_user_placeholder)
                 .transform(new CircleTransform())
                 .into(((ImageView) findViewById(R.id.google_avatar)));
     }
-
 }

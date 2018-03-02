@@ -1,136 +1,81 @@
 package in.dragons.galaxy;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.app.AlertDialog;
-import android.app.SearchManager;
 import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.SearchView;
-import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
-
-import java.io.IOException;
+import com.afollestad.aesthetic.Aesthetic;
+import com.afollestad.aesthetic.NavigationViewMode;
+import com.percolate.caffeine.ViewUtils;
 
 import in.dragons.galaxy.fragment.FilterMenu;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
-public abstract class GalaxyActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public abstract class GalaxyActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    static protected boolean logout = false;
-    protected String Email;
-    protected View header;
+    private NavigationView navigationView;
+    DrawerLayout drawer;
+    ActionBarDrawerToggle toggle;
+    Toolbar toolbar;
 
-    public static void cascadeFinish() {
-        GalaxyActivity.logout = true;
-    }
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-    protected void onCreateDrawer(Bundle savedInstanceState) {
-        Log.v(getClass().getSimpleName(), "Starting activity");
-        logout = false;
-        if (((GalaxyApplication) getApplication()).isTv()) {
-            requestWindowFeature(Window.FEATURE_OPTIONS_PANEL);
-        }
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        View header = navigationView.getHeaderView(0);
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        Email = sharedPreferences.getString(PlayStoreApiAuthenticator.PREFERENCE_EMAIL, "");
-        try {
-            if (Email.contains("yalp"))
-                ((TextView) header.findViewById(R.id.usr_email)).setText(R.string.header_usr_email);
-            else
-                getRawData("http://picasaweb.google.com/data/entry/api/user/" + Email);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (Aesthetic.isFirstTime()) {
+            Aesthetic.get()
+                    .activityTheme(R.style.AppTheme)
+                    .textColorPrimaryRes(R.color.colorTextPrimary)
+                    .textColorSecondaryRes(R.color.colorTextSecondary)
+                    .colorPrimaryRes(R.color.colorPrimary)
+                    .colorAccentRes(R.color.colorAccent)
+                    .colorStatusBarAuto()
+                    .colorNavigationBarAuto()
+                    .textColorPrimary(Color.BLACK)
+                    .navigationViewMode(NavigationViewMode.SELECTED_ACCENT)
+                    .apply();
         }
 
+        getUser();
+
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-
     }
 
-    @SuppressLint("StaticFieldLeak")
-    public void getRawData(final String url) throws IOException {
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... voids) {
-                OkHttpClient client = new OkHttpClient();
-                Request request = new Request.Builder()
-                        .url(url)
-                        .build();
-                try (Response response = client.newCall(request).execute()) {
-                    return response.body().string();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(String result) {
-                if (result != null && result.contains("atom"))
-                    parseRAW(result);
-                else {
-                    Log.e(this.getClass().getName(), "No network connection");
-                    //((TextView) findViewById(R.id.usr_email)).setText(R.string.header_usr_noNetwork);
-                }
-            }
-
-        }.execute();
-    }
-
-    public void parseRAW(String rawData) {
-        setNavHeaderInfo((NavigationView) findViewById(R.id.nav_view),
-                rawData.substring(rawData.indexOf("<name>") + 6, rawData.indexOf("</name>")),
-                rawData.substring(rawData.indexOf("<gphoto:thumbnail>") + 18, rawData.lastIndexOf("</gphoto:thumbnail>")));
-    }
-
-    public void setNavHeaderInfo(NavigationView navigationView, String Name, String URL) {
+    public void getUser() {
         View header = navigationView.getHeaderView(0);
-        ((TextView) header.findViewById(R.id.usr_name)).setText(Name);
-        ((TextView) header.findViewById(R.id.usr_email)).setText(Email);
-
-        Picasso.with(this)
-                .load(URL)
-                .placeholder(R.drawable.ic_user_placeholder)
-                .transform(new CircleTransform())
-                .into(((ImageView) header.findViewById(R.id.usr_img)));
+        if (isValidEmail(Email) && isConnected())
+            new GoogleAccountInfo(Email) {
+                @Override
+                public void onPostExecute(String result) {
+                    parseRAW(result);
+                }
+            }.execute();
+        else if (isDummyEmail())
+            ViewUtils.setText(header, R.id.usr_email, getResources().getString(R.string.header_usr_email));
     }
 
     @Override
@@ -202,65 +147,6 @@ public abstract class GalaxyActivity extends AppCompatActivity implements Naviga
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void addQueryTextListener(MenuItem searchItem) {
-        SearchView searchView = (SearchView) searchItem.getActionView();
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        if (null != searchManager) {
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-            searchView.setQueryHint(getString(R.string.search_title));
-        }
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-            @Override
-            public boolean onQueryTextChange(String query) {
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                Intent i = new Intent(GalaxyActivity.this, SearchActivity.class);
-                i.setAction(Intent.ACTION_SEARCH);
-                i.putExtra(SearchManager.QUERY, query);
-                startActivity(i);
-                return false;
-            }
-        });
-    }
-
-    AlertDialog showLogOutDialog() {
-        return new AlertDialog.Builder(this)
-                .setMessage(R.string.dialog_message_logout)
-                .setTitle(R.string.dialog_title_logout)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        new PlayStoreApiAuthenticator(getApplicationContext()).logout();
-                        dialogInterface.dismiss();
-                        finishAll();
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
-    }
-
-    AlertDialog showFallbackSearchDialog() {
-        final EditText textView = new EditText(this);
-        return new AlertDialog.Builder(this)
-                .setView(textView)
-                .setPositiveButton(android.R.string.search_go, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent i = new Intent(getApplicationContext(), SearchActivity.class);
-                        i.setAction(Intent.ACTION_SEARCH);
-                        i.putExtra(SearchManager.QUERY, textView.getText().toString());
-                        startActivity(i);
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
-    }
-
     protected void finishAll() {
         logout = true;
         finish();
@@ -283,6 +169,9 @@ public abstract class GalaxyActivity extends AppCompatActivity implements Naviga
                 break;
             case R.id.action_accounts:
                 startActivity(new Intent(this, AccountsActivity.class));
+                break;
+            case R.id.action_themes:
+                startActivity(new Intent(this, ThemesActivity.class));
                 break;
             case R.id.action_about:
                 startActivity(new Intent(this, AboutActivity.class));
